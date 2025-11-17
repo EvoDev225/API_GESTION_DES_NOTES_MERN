@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@theme{
+  --color-primary:#1e1e1e;
+  --color-secondary:#656565;
+  --color-third : #747474;
+}
+.box_shadow{
+  box-shadow: 0 0 20px 0px rgba(255, 255, 255, 0);
+}

@@ -3,13 +3,21 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 
 const identificationAdmin = async(req,res)=>{
-    const {nom,password} = req.body
+    const {password} = req.body
+    if( !password){
+        return res.status(400).json({message:"Veuillez remplir  les champs !"})
+    }
     try {
-        const admin = await Admin.findOne({nom})
-        if(admin && bcrypt.compare(password,admin.password)){
-            return res.status(200).json({message:"Administrateur connecté !",data:admin})
+        const admin = await Admin.findOne({})
+        if(!admin){
+            return res.status(404).json({message:"Auncun résultat"})
         }
-        return res.status(404).json({message:"Les informations sont incorrectes !"})
+        const ispassword = await bcrypt.compare(password,admin.password)
+        if(ispassword){
+            return res.status(200).json({Status:"Success",message:"Administrateur connecté !",data:admin})
+        }else{
+        return res.status(404).json({message:"Le mot de passe est   incorrecte !"})
+        }
     } catch (error) {
         return res.status(500).json({message:"Une erreur est survenue lors de la requête sur l'administrateur !",error:error.message})
     }

@@ -8,7 +8,7 @@ const touteNote = async (req,res)=>{
         if(!notes){
             return res.status(404).json({message:"Aucune notes n'a été trouvé !"})
         }
-        return res.status(200).json({message:"Les notes ont été récupéré !",data:notes})
+        return res.status(200).json({Status:"Success",message:"Les notes ont été récupéré !",data:notes})
     } catch (error) {
         return res.status(500).json({message:"Une erreur est survenue lors de l'obtention des notes !",error:error.message})
     }

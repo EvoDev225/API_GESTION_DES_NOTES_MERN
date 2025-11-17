@@ -7,7 +7,7 @@ const toutEtudiant = async (req, res) => {
     try {
         const totalEtudiant = await Etudiant.find()
         if (totalEtudiant.length > 0) {
-            res.status(200).json({ message: "Etudiants trouvés!", data: totalEtudiant })
+            return res.status(200).json({Status:"Success", message: "Etudiants trouvés!", data: totalEtudiant })
         }
         return res.status(404).json({message: "Aucun étudiant n'a été trouvé !"})
     } catch (error) {
@@ -26,6 +26,22 @@ const specifiqEtudiant = async (req, res) => {
     } catch (error) {
         return res.status(400).json({ message: "Une erreur est survenue lors de l'obtention des informations de l'étudiant !", error: error.message })
     }
+}
+// Connection d'un étudiant
+const connectEtudiant = async (req,res)=>{
+    const {matricule} = req.body
+try {
+    if(!matricule){
+        return res.status(404).json({message:"Le champ est requis !"})
+    }
+    const etud = await Etudiant.findOne({matricule:matricule})
+    if(!etud){
+        return res.status(404).json({message:"Le matricule est incorrecte"})
+    }
+    return res.status(201).json({Status:"Success",message:"Etudiant connecté !"})
+} catch (error) {
+    return res.status(500).json({message:"Une erreur est survenue lors de la connexion de l'étudiant !"})
+}
 }
 
 //Création d'un nouvel étudiant
@@ -91,4 +107,4 @@ const suppEtudiant = async (req, res) => {
         return res.status(400).json({ message: "Une erreur est survenue lors de la suppression des informations de l'étudiant !", error: error.message })
     }
 }
-module.exports = { toutEtudiant, specifiqEtudiant, nouvelEtudiant, majEtudiant, suppEtudiant }
+module.exports = { toutEtudiant, specifiqEtudiant, nouvelEtudiant, majEtudiant, suppEtudiant,connectEtudiant }
