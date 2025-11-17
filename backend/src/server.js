@@ -4,6 +4,7 @@ const dotenv = require("dotenv")
 const connectDB = require("./config/db");
 const etudiantrouter = require("./routes/etudiantRoutes");
 const routeClasse = require("./routes/routeClasse")
+const routeNote  = require('./routes/routeClasse')
 dotenv.config()
 const app = express();
 
@@ -27,6 +28,7 @@ connectDB();
 
 app.use("/etudiant", etudiantrouter);
 app.use("/classe", routeClasse);
+app.use("/note", routeNote);
 
 app.listen(process.env.PORT || 3000, () => {
     console.log("server running !");

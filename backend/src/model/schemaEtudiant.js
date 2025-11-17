@@ -2,6 +2,10 @@ const mongoose = require('mongoose')
 
 const schemaEtudiant = new mongoose.Schema(
     {
+        matricule:{
+            type:String,
+            required:true
+        },
     nom:{
         type:String,
         required:true
