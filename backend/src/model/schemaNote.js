@@ -15,6 +15,10 @@ const schemaNote =new  mongoose.Schema(
     moyenneGenerale: {
         type: Number,
         required:true
+    },
+    Status:{
+        type:String,
+        required:true
     }
 },{timestamps:true})
 

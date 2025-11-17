@@ -1,5 +1,7 @@
 // Récupération du schéma
 const Etudiant = require('../model/schemaEtudiant')
+const Note = require('../model/schemaNote')
+
 // Sélection de tous les étudiants
 const toutEtudiant = async (req, res) => {
     try {
@@ -7,8 +9,9 @@ const toutEtudiant = async (req, res) => {
         if (totalEtudiant.length > 0) {
             res.status(200).json({ message: "Etudiants trouvés!", data: totalEtudiant })
         }
+        return res.status(404).json({message: "Aucun étudiant n'a été trouvé !"})
     } catch (error) {
-        return res.status(400).json({ message: "Aucun étudiant n'a été trouvé !" })
+        return res.status(500).json({ message: "Une erreur est survenu !" })
     }
 }
 // Sélection d'un étudiant par son identifiant
@@ -60,12 +63,30 @@ const majEtudiant = async (req, res) => {
 //Suppression d'un étudiant
 const suppEtudiant = async (req, res) => {
     const id = req.params.id
-    try {
-        const supprimerEtudiant = await Etudiant.findByIdAndDelete(id)
-        if(!supprimerEtudiant){
-            return res.status(404).json({message: "l'identifiant ne correspond a aucun étudiant"})
+     try {
+        console.log('🔍 ID reçu pour suppression:', id)
+        
+        // 1. Trouver l'étudiant par son ID
+        const etudiant = await Etudiant.findById(id)
+        console.log('🔍 Étudiant trouvé:', etudiant)
+        
+        if(!etudiant){
+            return res.status(404).json({message: "Aucun étudiant trouvé avec cet ID !"})
         }
-        return res.status(200).json({ message: "L'étudiant a bien été supprimé!" })
+        
+        // 2. Récupérer le matricule de l'étudiant trouvé
+        const matriculeEtudiant = etudiant.matricule
+        console.log('🔍 Matricule à supprimer:', matriculeEtudiant)
+        
+        // 3. Supprimer toutes les notes de cet étudiant
+        await Note.deleteMany({matetud: matriculeEtudiant})
+        console.log('✅ Notes supprimées')
+        
+        // 4. Supprimer l'étudiant
+        const supprimerEtudiant = await Etudiant.findByIdAndDelete(id)
+        console.log('✅ Étudiant supprimé')
+        
+        return res.status(200).json({  message: "L'étudiant et ses notes ont bien été supprimés !"})
     } catch (error) {
         return res.status(400).json({ message: "Une erreur est survenue lors de la suppression des informations de l'étudiant !", error: error.message })
     }
