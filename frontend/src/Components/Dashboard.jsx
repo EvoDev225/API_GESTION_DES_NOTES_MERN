@@ -397,6 +397,7 @@ const Dashboard = () => {
                                     <tr>
                                         <td colSpan="9" className="text-center py-8 text-gray-500">
                                             Sélectionnez un étudiant pour afficher ses notes
+                                            jfjfjfjfjfjfjfjffjjfjfjfjf
                                         </td>
                                     </tr>
                                 )}
