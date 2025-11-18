@@ -69,7 +69,7 @@ const majEtudiant = async (req, res) => {
         if (!majEtudiant) {
             return res.status(404).json({message: "l'identifiant ne correspond a aucun étudiant"})
         }
-            return res.status(200).json({ message: "les données de l'étudiant ont été mise à jour !", data: majetudiant })
+            return res.status(200).json({Status:"Success", message: "les données de l'étudiant ont été mise à jour !", data: majetudiant })
     } catch (error) {
         return res.status(400).json({ message: "Une erreur est survenue lors de l'obtention des informations de l'étudiant !", error: error.message })
     }
@@ -102,7 +102,7 @@ const suppEtudiant = async (req, res) => {
         const supprimerEtudiant = await Etudiant.findByIdAndDelete(id)
         console.log('✅ Étudiant supprimé')
         
-        return res.status(200).json({  message: "L'étudiant et ses notes ont bien été supprimés !"})
+        return res.status(200).json({Status:"Success",  message: "L'étudiant et ses notes ont bien été supprimés !"})
     } catch (error) {
         return res.status(400).json({ message: "Une erreur est survenue lors de la suppression des informations de l'étudiant !", error: error.message })
     }

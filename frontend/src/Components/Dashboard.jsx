@@ -9,10 +9,12 @@ import toast from "react-hot-toast";
 
 const Dashboard = () => {
     const [etudiant, setEtudiant] = useState([]);
-    const [notes, setNotes] = useState([]); // Changé de 'note' à 'notes' pour plus de clarté
+    const [notes, setNotes] = useState([]);
     const [classe, setClasse] = useState([]);
     const [liste, setListe] = useState([]);
-    const [selectedEtudiant, setSelectedEtudiant] = useState(""); // Pour l'étudiant sélectionné
+    const [selectedEtudiant, setSelectedEtudiant] = useState("");
+    const [pourcentageReussite, setPourcentageReussite] = useState(0);
+    const [selectedClasseId, setSelectedClasseId] = useState("");
 
     useEffect(() => {
         const fetchEtudiant = async () => {
@@ -31,7 +33,7 @@ const Dashboard = () => {
                 const classes = await axios.get("http://localhost:3000/classe");
                 if (classes.data.Status === "Success") {
                     setClasse(classes.data.data);
-                    setListe([]); // Réinitialiser la liste au chargement
+                    setListe([]);
                 }
             } catch (error) {
                 toast.error("Erreur lors du chargement des classes");
@@ -41,11 +43,58 @@ const Dashboard = () => {
         fetchClasse();
     }, []);
 
+    const calculerPourcentageReussite = async (classeId) => {
+        if (!classeId) {
+            setPourcentageReussite(0);
+            return;
+        }
+
+        try {
+            // Récupérer tous les étudiants de la classe
+            const etudiantsClasse = await axios.get(`http://localhost:3000/classe/etudiant/${classeId}`);
+            
+            if (etudiantsClasse.data.Status === "Success" && etudiantsClasse.data.data.length > 0) {
+                let totalAdmis = 0;
+                let totalEtudiants = 0;
+
+                // Pour chaque étudiant, récupérer ses notes et vérifier s'il est admis
+                for (const etudiant of etudiantsClasse.data.data) {
+                    try {
+                        const notesResponse = await axios.post("http://localhost:3000/note/etudiant", {
+                            matricule: etudiant.matricule,
+                        });
+                        
+                        if (notesResponse.data.Status === "Success" && notesResponse.data.data.length > 0) {
+                            const notesEtudiant = notesResponse.data.data[0]; // Prendre le premier élément du tableau
+                            if (notesEtudiant.moyenneGenerale > 10) {
+                                totalAdmis++;
+                            }
+                            totalEtudiants++;
+                        }
+                    } catch (error) {
+                        console.log(`Erreur lors du chargement des notes pour ${etudiant.matricule}`);
+                    }
+                }
+
+                // Calculer le pourcentage
+                const pourcentage = totalEtudiants > 0 ? Math.round((totalAdmis / totalEtudiants) * 100) : 0;
+                setPourcentageReussite(pourcentage);
+            } else {
+                setPourcentageReussite(0);
+            }
+        } catch (error) {
+            console.error("Erreur lors du calcul du pourcentage de réussite:", error);
+            setPourcentageReussite(0);
+        }
+    };
+
     const afficherNom = async (id) => {
         if (!id) {
-            setListe([]); // Vider la liste si aucune classe sélectionnée
-            setSelectedEtudiant(""); // Réinitialiser l'étudiant sélectionné
-            setNotes([]); // Vider les notes aussi
+            setListe([]);
+            setSelectedEtudiant("");
+            setNotes([]);
+            setPourcentageReussite(0);
+            setSelectedClasseId("");
             return;
         }
 
@@ -55,19 +104,24 @@ const Dashboard = () => {
             );
             if (nomEtudiant.data.Status === "Success") {
                 setListe(nomEtudiant.data.data);
-                setSelectedEtudiant(""); // Réinitialiser l'étudiant sélectionné quand on change de classe
-                setNotes([]); // Vider les notes quand on change de classe
+                setSelectedEtudiant("");
+                setNotes([]);
+                setSelectedClasseId(id);
+                
+                // Calculer le pourcentage de réussite pour cette classe
+                calculerPourcentageReussite(id);
             }
         } catch (error) {
-            setListe([]); // Vider la liste en cas d'erreur
-            setNotes([]); // Vider les notes en cas d'erreur
+            setListe([]);
+            setNotes([]);
+            setPourcentageReussite(0);
         }
     };
 
     const fetchNotes = async (matricule) => {
         if (!matricule) {
-            setNotes([]); // Vider les notes si aucun étudiant sélectionné
-            setSelectedEtudiant(""); // Réinitialiser la sélection
+            setNotes([]);
+            setSelectedEtudiant("");
             return;
         }
 
@@ -77,14 +131,14 @@ const Dashboard = () => {
             });
             if (notes.data.Status === "Success") {
                 setNotes(notes.data.data);
-                setSelectedEtudiant(matricule); // Stocker le matricule sélectionné
+                setSelectedEtudiant(matricule);
                 toast.success("Notes chargées avec succès");
             }
         } catch (error) {
             toast.error(
                 error.response?.data?.message || "Erreur lors du chargement des notes"
             );
-            setNotes([]); // Vider les notes en cas d'erreur
+            setNotes([]);
         }
     };
 
@@ -95,7 +149,7 @@ const Dashboard = () => {
     // Fonction pour calculer la moyenne d'une matière
     const calculerMoyenneMatiere = (notesMatiere) => {
         if (!notesMatiere || notesMatiere.length === 0) return 0;
-        const somme = notesMatiere.reduce((acc, note) => acc + note.valeur, 0);
+        const somme = notesMatiere.reduce((acc, note) => acc + note, 0);
         return (somme / notesMatiere.length).toFixed(2);
     };
 
@@ -116,7 +170,26 @@ const Dashboard = () => {
 
         return totalMatieres > 0 ? (totalNotes / totalMatieres).toFixed(2) : 0;
     };
-    console.log(notes);
+
+    const supprimerEtudiant = async (id) => {
+        try {
+            const supp = await axios.delete(`http://localhost:3000/etudiant/${id}`)
+            console.log(id)
+            if (supp.data.Status === "Success") {
+                toast.success(supp.data.message)
+                setListe([])
+                setEtudiant([])
+                setNotes([])
+                // Recalculer le pourcentage après suppression
+                if (selectedClasseId) {
+                    calculerPourcentageReussite(selectedClasseId);
+                }
+            }
+        } catch (error) {
+            toast.error(error.response)
+        }
+    }
+
     return (
         <div className="min-h-screen flex relative">
             <NavBar />
@@ -149,7 +222,7 @@ const Dashboard = () => {
                                 </div>
                             </div>
                             <div className="stat-title text-3xl">Pourcentage de réussite</div>
-                            <div className="stat-value">86%</div>
+                            <div className="stat-value">{pourcentageReussite}%</div>
                         </div>
                     </div>
                 </div>
@@ -221,14 +294,14 @@ const Dashboard = () => {
                                             <td>{index}</td>
                                             <td>{et.nom}</td>
                                             <td>{et.prenom}</td>
-                                            <td>{et.datenaiss}</td>
+                                            <td>{new Date(et.datenaiss).toLocaleDateString()}</td>
                                             <td>{et.sexe}</td>
                                             <td>
                                                 <div className="flex items-center gap-4 justify-center">
-                                                    <button className="border-2 px-4 py-2 rounded-xl bg-green-600 border-green-400 cursor-pointer duration-200 transition-colors hover:bg-green-800">
+                                                    <button className="border-2 px-4 py-2 rounded-xl bg-green-600 border-green-400 cursor-pointer duration-200 transition-colors hover:bg-green-800 text-white">
                                                         Modifier
                                                     </button>
-                                                    <button className="border-2 px-4 py-2 rounded-xl bg-red-600 border-red-400 cursor-pointer duration-200 transition-colors hover:bg-red-800">
+                                                    <button onClick={() => supprimerEtudiant(et._id)} className="border-2 px-4 py-2 rounded-xl bg-red-600 border-red-400 cursor-pointer duration-200 transition-colors hover:bg-red-800 text-white">
                                                         Supprimer
                                                     </button>
                                                 </div>
@@ -275,51 +348,58 @@ const Dashboard = () => {
                                 </tr>
                             </thead>
                             <tbody className="text-center">
-                                {notes.map((n, index) => (
-                                    <tr key={index}>
-                                        <td>{index} </td>
-                                        <td>
-                                            {n.francais[0]} {n.francais[1]}{" "}
-                                        </td>
-                                        <td>
-                                            {n.mathematique[0]} {n.mathematique[1]}{" "}
-                                        </td>
-                                        <td>
-                                            {n.anglais[0]} {n.anglais[1]}{" "}
-                                        </td>
-                                        <td>
-                                            {n.svt[0]} {n.svt[1]}{" "}
-                                        </td>
-                                        <td>
-                                            <div className="flex items-center gap-6 justify-between ">
-                                                <p> {n.francais[2]} </p>
-                                                <p> {n.mathematique[2]} </p>
-                                                <p> {n.anglais[2]} </p>
-                                                <p> {n.svt[2]} </p>
-                                            </div>
-                                        </td>
-                                        <td>{n.moyenneGenerale} </td>
-                                        <td
-                                            className={`${n.moyenneGenerale > 10
+                                {notes.length > 0 ? (
+                                    notes.map((n, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>
+                                                {n.francais ? n.francais.slice(0, 2).join(', ') : "N/A"}
+                                            </td>
+                                            <td>
+                                                {n.mathematique ? n.mathematique.slice(0, 2).join(', ') : "N/A"}
+                                            </td>
+                                            <td>
+                                                {n.anglais ? n.anglais.slice(0, 2).join(', ') : "N/A"}
+                                            </td>
+                                            <td>
+                                                {n.svt ? n.svt.slice(0, 2).join(', ') : "N/A"}
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-6 justify-between">
+                                                    <p>{n.francais ? n.francais[2] || "N/A" : "N/A"}</p>
+                                                    <p>{n.mathematique ? n.mathematique[2] || "N/A" : "N/A"}</p>
+                                                    <p>{n.anglais ? n.anglais[2] || "N/A" : "N/A"}</p>
+                                                    <p>{n.svt ? n.svt[2] || "N/A" : "N/A"}</p>
+                                                </div>
+                                            </td>
+                                            <td>{n.moyenneGenerale || "N/A"}</td>
+                                            <td
+                                                className={`${n.moyenneGenerale > 10
                                                     ? "text-green-600"
                                                     : "text-red-600"
-                                                } font-bold`}
-                                        >
-                                            {" "}
-                                            {n.Status}
-                                        </td>
-                                        <td>
-                                            <div className="flex items-center gap-4 justify-center">
-                                                <button className="border-2 px-4 py-2 rounded-xl bg-green-600 border-green-400 cursor-pointer duration-200 transition-colors hover:bg-green-800">
-                                                    Modifier
-                                                </button>
-                                                <button className="border-2 px-4 py-2 rounded-xl bg-red-600 border-red-400 cursor-pointer duration-200 transition-colors hover:bg-red-800">
-                                                    Supprimer
-                                                </button>
-                                            </div>
+                                                    } font-bold`}
+                                            >
+                                                {n.Status || (n.moyenneGenerale > 10 ? "Admis" : "Recalé")}
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-4 justify-center">
+                                                    <button className="border-2 px-4 py-2 rounded-xl bg-green-600 border-green-400 cursor-pointer duration-200 transition-colors hover:bg-green-800 text-white">
+                                                        Modifier
+                                                    </button>
+                                                    <button className="border-2 px-4 py-2 rounded-xl bg-red-600 border-red-400 cursor-pointer duration-200 transition-colors hover:bg-red-800 text-white">
+                                                        Supprimer
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="9" className="text-center py-8 text-gray-500">
+                                            Sélectionnez un étudiant pour afficher ses notes
                                         </td>
                                     </tr>
-                                ))}
+                                )}
                             </tbody>
                         </table>
                     </div>
