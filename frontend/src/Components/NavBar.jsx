@@ -2,7 +2,7 @@ import { FaPlusCircle } from "react-icons/fa";
 import { FaFileAlt } from "react-icons/fa";
 const NavBar = () => {
   return (
-    <div className=" flex flex-col py-20 px-5 min-h-screen  w-[200px] shadow-xl ">
+    <div className=" flex flex-col py-20 px-5 min-h-screen fixed  w-[200px] shadow-xl ">
             <div className="text-3xl font-bold">
                 DashBoard
             </div>

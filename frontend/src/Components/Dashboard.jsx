@@ -1,61 +1,144 @@
-import  { useEffect, useState } from 'react'
-import NavBar from './NavBar'
-import toast from 'react-hot-toast'
-import axios from 'axios'
+import { useEffect, useState } from "react";
+import NavBar from "./NavBar";
+import axios from "axios";
 import { FaUser } from "react-icons/fa";
 import { FaUsers } from "react-icons/fa";
 import { FaRegChartBar } from "react-icons/fa";
+import { FaFilter } from "react-icons/fa6";
+import toast from "react-hot-toast";
+
 const Dashboard = () => {
-    const [etudiant, setEtudiant] = useState([])
-        const [note, setNote] = useState([])
-        useEffect(() => {
-        const afficherEtudiant = async () => {
+    const [etudiant, setEtudiant] = useState([]);
+    const [notes, setNotes] = useState([]); // Changé de 'note' à 'notes' pour plus de clarté
+    const [classe, setClasse] = useState([]);
+    const [liste, setListe] = useState([]);
+    const [selectedEtudiant, setSelectedEtudiant] = useState(""); // Pour l'étudiant sélectionné
+
+    useEffect(() => {
+        const fetchEtudiant = async () => {
             try {
-                const reponse = await axios.get('http://localhost:3000/etudiant');
-                if (reponse.data.Status === "Success") {
-                    setEtudiant(reponse.data.data); // ✔ Met directement la liste
+                const etudiant = await axios.get("http://localhost:3000/etudiant");
+                if (etudiant.data.Status === "Success") {
+                    setEtudiant(etudiant.data.data);
                 }
             } catch (error) {
-                console.log(error);
+                toast.error(error.response.etudiant.message);
             }
         };
-        const afficherNote = async ()=>{
+
+        const fetchClasse = async () => {
+            try {
+                const classes = await axios.get("http://localhost:3000/classe");
+                if (classes.data.Status === "Success") {
+                    setClasse(classes.data.data);
+                    setListe([]); // Réinitialiser la liste au chargement
+                }
+            } catch (error) {
+                toast.error("Erreur lors du chargement des classes");
+            }
+        };
+        fetchEtudiant();
+        fetchClasse();
+    }, []);
+
+    const afficherNom = async (id) => {
+        if (!id) {
+            setListe([]); // Vider la liste si aucune classe sélectionnée
+            setSelectedEtudiant(""); // Réinitialiser l'étudiant sélectionné
+            setNotes([]); // Vider les notes aussi
+            return;
+        }
+
         try {
-            const reponse = await axios.get("http://localhost:3000/note")
-            if(reponse.data.Status==="Success"){
-                setNote(reponse.data.data)
-                
+            const nomEtudiant = await axios.get(
+                `http://localhost:3000/classe/etudiant/${id}`
+            );
+            if (nomEtudiant.data.Status === "Success") {
+                setListe(nomEtudiant.data.data);
+                setSelectedEtudiant(""); // Réinitialiser l'étudiant sélectionné quand on change de classe
+                setNotes([]); // Vider les notes quand on change de classe
             }
         } catch (error) {
-            console.log(error)
+            setListe([]); // Vider la liste en cas d'erreur
+            setNotes([]); // Vider les notes en cas d'erreur
         }
+    };
+
+    const fetchNotes = async (matricule) => {
+        if (!matricule) {
+            setNotes([]); // Vider les notes si aucun étudiant sélectionné
+            setSelectedEtudiant(""); // Réinitialiser la sélection
+            return;
         }
 
+        try {
+            const notes = await axios.post("http://localhost:3000/note/etudiant", {
+                matricule: matricule,
+            });
+            if (notes.data.Status === "Success") {
+                setNotes(notes.data.data);
+                setSelectedEtudiant(matricule); // Stocker le matricule sélectionné
+                toast.success("Notes chargées avec succès");
+            }
+        } catch (error) {
+            toast.error(
+                error.response?.data?.message || "Erreur lors du chargement des notes"
+            );
+            setNotes([]); // Vider les notes en cas d'erreur
+        }
+    };
 
-        afficherEtudiant();
-        afficherNote();
-    }, []);
-    console.log(note)
+    const handleEtudiantChange = (matricule) => {
+        fetchNotes(matricule);
+    };
+
+    // Fonction pour calculer la moyenne d'une matière
+    const calculerMoyenneMatiere = (notesMatiere) => {
+        if (!notesMatiere || notesMatiere.length === 0) return 0;
+        const somme = notesMatiere.reduce((acc, note) => acc + note.valeur, 0);
+        return (somme / notesMatiere.length).toFixed(2);
+    };
+
+    // Fonction pour calculer la moyenne générale
+    const calculerMoyenneGenerale = (allNotes) => {
+        if (!allNotes || Object.keys(allNotes).length === 0) return 0;
+
+        let totalNotes = 0;
+        let totalMatieres = 0;
+
+        Object.values(allNotes).forEach((notesMatiere) => {
+            if (notesMatiere && notesMatiere.length > 0) {
+                const moyenneMatiere = calculerMoyenneMatiere(notesMatiere);
+                totalNotes += parseFloat(moyenneMatiere);
+                totalMatieres++;
+            }
+        });
+
+        return totalMatieres > 0 ? (totalNotes / totalMatieres).toFixed(2) : 0;
+    };
+    console.log(notes);
     return (
-        <div className='min-h-screen flex  relative'>
+        <div className="min-h-screen flex relative">
             <NavBar />
 
-            <div className='  mt-20   w-full '>
-                <div className='flex items-center justify-center w-full  '>
+            <div className="mt-20 pl-[200px] w-full">
+                <div className="flex items-center justify-center w-full">
                     <div className="stats shadow">
                         <div className="stat">
                             <div className="stat-figure text-primary text-5xl">
                                 <FaUser />
                             </div>
-                            <div className="stat-title text-3xl">Nombre Total d'Etudiants</div>
-                            <div className="stat-value text-primary">  {etudiant.length}</div>
+                            <div className="stat-title text-3xl">
+                                Nombre Total d'Etudiants
+                            </div>
+                            <div className="stat-value text-primary">{etudiant.length}</div>
                         </div>
                         <div className="stat">
                             <div className="stat-figure text-secondary text-5xl">
                                 <FaUsers />
                             </div>
                             <div className="stat-title text-3xl">Effectif par classe</div>
-                            <div className="stat-value text-secondary">2.6M</div>
+                            <div className="stat-value text-secondary">{liste.length}</div>
                         </div>
                         <div className="stat">
                             <div className="stat-figure text-secondary">
@@ -70,117 +153,180 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className='py-4 rounded-full  shadow-2xl justify-center my-15 flex items-center max-w-7xl mx-auto'>
-                    <div className='px-5 py-2 flex items-center gap-3'>
-                        <p className='text-2xl font-bold'>Classe:</p>
-                        <select className='text-xl' name="" id="">
-                            <option value="">Sélectionner   </option>
+
+                {/* Filtres */}
+                <div className="py-4 rounded-full shadow-2xl justify-around my-15 flex items-center max-w-7xl mx-auto">
+                    <div className="px-5 py-2 flex items-center gap-3">
+                        <p className="text-2xl font-bold">Classe:</p>
+                        <select
+                            className="text-xl text-gray-500"
+                            onChange={(e) => afficherNom(e.target.value)}
+                        >
+                            <option value="">Sélectionner</option>
+                            {classe.map((cl, index) => (
+                                <option value={cl._id} key={index}>
+                                    {cl.nom}
+                                </option>
+                            ))}
                         </select>
                     </div>
-                    <div className='px-5 py-2 flex items-center gap-3'>
-                        <p className='text-2xl font-bold'>Etudiants:</p>
-                        <select className='text-xl' name="" id="">
-                            <option value="">Sélectionner </option>
+
+                    <div className="px-5 py-2 flex items-center gap-3">
+                        <p className="text-2xl font-bold">Etudiants:</p>
+                        <select
+                            className="text-xl text-gray-500"
+                            value={selectedEtudiant}
+                            onChange={(e) => handleEtudiantChange(e.target.value)}
+                        >
+                            <option value="">Sélectionner</option>
+                            {liste.map((et, index) => (
+                                <option value={et.matricule} key={index}>
+                                    {et.nom} {et.prenom}
+                                </option>
+                            ))}
                         </select>
+                    </div>
+
+                    <div className="flex items-center">
+                        <span className="text-2xl">
+                            <FaFilter />
+                        </span>
+                        <div className="px-5 py-2 flex items-center gap-3">
+                            <p className="text-2xl font-bold">A-Z</p>
+                        </div>
+                        <div className="px-5 py-2 flex items-center gap-3">
+                            <p className="text-2xl font-bold">Z-A</p>
+                        </div>
                     </div>
                 </div>
-                <div className=' py-20 px-30'>
+
+                {/* Tableau des étudiants */}
+                <div className="py-20 px-30">
                     <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
                         <table className="table">
-                            {/* head */}
-                            <thead className='text-center'>
+                            <thead className="text-center">
                                 <tr>
-                                    <th></th>
+                                    <th>#</th>
                                     <th>Nom</th>
                                     <th>Prenom</th>
                                     <th>Date de naissance</th>
                                     <th>Sexe</th>
-                                    <th className='text-center'>Actions </th>
+                                    <th className="text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className='text-center'>
-                                {/* row 1 */}
-                                {
-                                    etudiant.map((e,index)=>(
-                                        <tr key={index}>
-                                            <td> {index} </td>
-                                            <td> {e.nom} </td>
-                                            <td> {e.prenom} </td>
-                                            <td> {e.datenaiss} </td>
-                                            <td> {e.sexe} </td>
+                            <tbody className="text-center">
+                                {liste.length > 0 ? (
+                                    liste.map((et, index) => (
+                                        <tr key={et._id || index}>
+                                            <td>{index}</td>
+                                            <td>{et.nom}</td>
+                                            <td>{et.prenom}</td>
+                                            <td>{et.datenaiss}</td>
+                                            <td>{et.sexe}</td>
                                             <td>
-                                                <div className='flex items-center gap-2  justify-center'>
-                                                    <button className=' border-2 px-4 py-2 rounded-xl bg-green-600 border-green-400 cursor-pointer duration-200 transition-colors hover:bg-green-800'>Modifier</button>
-                                                    <button className=' border-2 px-4 py-2 rounded-xl bg-red-600 border-red-400 cursor-pointer duration-200 transition-colors hover:bg-red-800 '>Supprimer</button>
-                                                </div>    
+                                                <div className="flex items-center gap-4 justify-center">
+                                                    <button className="border-2 px-4 py-2 rounded-xl bg-green-600 border-green-400 cursor-pointer duration-200 transition-colors hover:bg-green-800">
+                                                        Modifier
+                                                    </button>
+                                                    <button className="border-2 px-4 py-2 rounded-xl bg-red-600 border-red-400 cursor-pointer duration-200 transition-colors hover:bg-red-800">
+                                                        Supprimer
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
-                                }
+                                ) : (
+                                    <tr>
+                                        <td colSpan="6" className="text-center py-8 text-gray-500">
+                                            {classe.length > 0
+                                                ? "Sélectionnez une classe pour afficher les étudiants"
+                                                : "Aucune classe disponible"}
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div className=' py-10 px-30'>
+
+                {/* Tableau des notes */}
+                <div className="py-10 px-30">
                     <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
                         <table className="table">
-                            {/* henoad */}
-                            <thead className='text-center'>
+                            <thead className="text-center">
                                 <tr>
                                     <th></th>
                                     <th>Français</th>
                                     <th>Mathématique</th>
                                     <th>Anglais</th>
                                     <th>SVT</th>
-                                    <th className='text-center'>Moyenne
-                                       <div className='flex gap-5 text-center justify-between'>
-                                        <p>Français</p>
-                                        <p>Mathématique</p>
-                                        <p>Anglais</p>
-                                        <p>SVT</p>
-                                        </div> 
+                                    <th className="tex-center">
+                                        Moyenne
+                                        <div className="flex items-center gap-6 justify-between">
+                                            <p>Français</p>
+                                            <p>Mathématique</p>
+                                            <p>Anglais</p>
+                                            <p>SVT</p>
+                                        </div>
                                     </th>
-                                    <th>Moyenne générale</th>
-                                    <th className='text-center'>Actions </th>
+                                    <th>Moyenne Générale</th>
+                                    <th>Status</th>
+                                    <th className="text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className='text-center'>
-                                {/* row 1 */}
-                               {
-                                note.map((notes,index)=>(
+                            <tbody className="text-center">
+                                {notes.map((n, index) => (
                                     <tr key={index}>
-                                        <td> {index} </td>
-                                        <td> {notes.francais[0]} / {notes.francais[1]} </td>
-                                        <td>{notes.mathematique[0]} / {notes.mathematique[1]} </td>
-                                        <td> {notes.anglais[0]} / {notes.anglais[1]} </td>
-                                        <td> {notes.svt[0]} / {notes.svt[1]}  </td>
-                                        <td> 
-                                         <div className='flex gap-10   justify-between '>
-                                        <p>{notes.francais[2]}</p>
-                                        <p>{notes.mathematique[2]}</p>
-                                        <p> {notes.anglais[2]} </p>
-                                        <p> {notes.svt[2]} </p>
-                                        </div>     
-                                         </td>
-                                        <td> {notes.moyenneGenerale} </td>
-                                        <td> 
-                                             <div className='flex items-center gap-2  justify-center '>
-                                                    <button className=' border-2 px-4 py-2 rounded-xl bg-green-600 border-green-400 cursor-pointer duration-200 transition-colors hover:bg-green-800'>Modifier</button>
-                                                    <button className=' border-2 px-4 py-2 rounded-xl bg-red-600 border-red-400 cursor-pointer duration-200 transition-colors hover:bg-red-800 '>Supprimer</button>
-                                                </div>    
-
+                                        <td>{index} </td>
+                                        <td>
+                                            {n.francais[0]} {n.francais[1]}{" "}
+                                        </td>
+                                        <td>
+                                            {n.mathematique[0]} {n.mathematique[1]}{" "}
+                                        </td>
+                                        <td>
+                                            {n.anglais[0]} {n.anglais[1]}{" "}
+                                        </td>
+                                        <td>
+                                            {n.svt[0]} {n.svt[1]}{" "}
+                                        </td>
+                                        <td>
+                                            <div className="flex items-center gap-6 justify-between ">
+                                                <p> {n.francais[2]} </p>
+                                                <p> {n.mathematique[2]} </p>
+                                                <p> {n.anglais[2]} </p>
+                                                <p> {n.svt[2]} </p>
+                                            </div>
+                                        </td>
+                                        <td>{n.moyenneGenerale} </td>
+                                        <td
+                                            className={`${n.moyenneGenerale > 10
+                                                    ? "text-green-600"
+                                                    : "text-red-600"
+                                                } font-bold`}
+                                        >
+                                            {" "}
+                                            {n.Status}
+                                        </td>
+                                        <td>
+                                            <div className="flex items-center gap-4 justify-center">
+                                                <button className="border-2 px-4 py-2 rounded-xl bg-green-600 border-green-400 cursor-pointer duration-200 transition-colors hover:bg-green-800">
+                                                    Modifier
+                                                </button>
+                                                <button className="border-2 px-4 py-2 rounded-xl bg-red-600 border-red-400 cursor-pointer duration-200 transition-colors hover:bg-red-800">
+                                                    Supprimer
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
-                                ))
-                               }
-
+                                ))}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default Dashboard
+export default Dashboard;

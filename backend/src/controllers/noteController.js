@@ -15,14 +15,14 @@ const touteNote = async (req,res)=>{
 }
 // Récupération des notes spécifiques a un étudiant
 const etudiantNote = async (req,res)=>{
-    const id = req.params.id
+    const {matricule} = req.body
     try {
         // On vérifie si l'identifiant est correcte
-        const notes = await Note.findById(id)
+        const notes = await Note.find({matetud:matricule})
         if(notes.length===0){
-            return res.status(404).json({message:"Aucune notes n'a été trouvé correspondant a cet identifiant !"})
+            return res.status(404).json({message:"Aucune notes n'a été trouvé correspondant a ce matricule !"})
         }
-        return res.status(200).json({message:"Les notes  de l'étudiant  ont été récupéré !",data:notes})
+        return res.status(200).json({Status:"Success",message:"Les notes  de l'étudiant  ont été récupéré !",data:notes})
     } catch (error) {
         return res.status(500).json({message:"Une erreur est survenue lors de l'obtention des notes !",error:error.message})
     }
