@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const {toutEtudiant,specifiqEtudiant,nouvelEtudiant,majEtudiant,suppEtudiant,connectEtudiant} = require('../controllers/StudentController')
+const {toutEtudiant,specifiqEtudiant,nouvelEtudiant,majEtudiant,suppEtudiant,connectEtudiant,genererMatricule} = require('../controllers/StudentController')
+router.get('/generateur',genererMatricule)
 router.get('/',toutEtudiant)
 router.get('/:matricule',specifiqEtudiant)
 router.post('/',nouvelEtudiant)

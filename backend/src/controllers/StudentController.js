@@ -53,7 +53,7 @@ const nouvelEtudiant = async (req, res) => {
         }
         const nouveau = new Etudiant({ matricule,nom, prenom, datenaiss, sexe, matClasse })
         const ajoutEtudiant = await nouveau.save()
-        res.status(201).json({ message: "Etudiant enregistré avec succès !", data: ajoutEtudiant })
+        res.status(201).json({Status:"Success", message: "Etudiant enregistré avec succès !", data: ajoutEtudiant })
     } catch (error) {
         return res.status(500).json({ message: "une erreur est survenue lors de l'enregistrement !", error: error })
     }
@@ -107,4 +107,31 @@ const suppEtudiant = async (req, res) => {
         return res.status(400).json({ message: "Une erreur est survenue lors de la suppression des informations de l'étudiant !", error: error.message })
     }
 }
-module.exports = { toutEtudiant, specifiqEtudiant, nouvelEtudiant, majEtudiant, suppEtudiant,connectEtudiant }
+const genererMatricule = async (req, res) => {
+    try {
+        const dernierEtudiant = await Etudiant.findOne()
+            .sort({ createdAt: -1 })
+            .select('matricule')
+        
+        let nouveauMatricule = 'ET001'
+        
+        if (dernierEtudiant && dernierEtudiant.matricule) {
+            const dernierNumero = parseInt(dernierEtudiant.matricule.substring(2))
+            const nouveauNumero = (dernierNumero + 1).toString().padStart(3, '0')
+            nouveauMatricule = `ET${nouveauNumero}`
+        }
+        
+        return res.status(200).json({
+            Status: "Success",
+            matricule: nouveauMatricule
+        })
+        
+    } catch (error) {
+        console.error("Erreur génération matricule:", error)
+        return res.status(500).json({
+            message: "Erreur lors de la génération du matricule",
+            error: error.message
+        })
+    }
+}
+module.exports = { toutEtudiant, specifiqEtudiant, nouvelEtudiant, majEtudiant, suppEtudiant,connectEtudiant,genererMatricule }
