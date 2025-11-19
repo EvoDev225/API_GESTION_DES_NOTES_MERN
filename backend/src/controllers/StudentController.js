@@ -65,7 +65,7 @@ const majEtudiant = async (req, res) => {
     const id = req.params.id
     const { matricule, nom, prenom, datenaiss, sexe, matClasse } = req.body
     try {
-        const majetudiant = await Etudiant.findByIdAndDelete(id, {matricule, nom, prenom, datenaiss, sexe, matClasse }, { new: true })
+        const majetudiant = await Etudiant.findByIdAndUpdate(id, {matricule, nom, prenom, datenaiss, sexe, matClasse }, { new: true })
         if (!majEtudiant) {
             return res.status(404).json({message: "l'identifiant ne correspond a aucun étudiant"})
         }

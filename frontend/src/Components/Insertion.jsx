@@ -75,7 +75,6 @@ const Insertion = () => {
             }
         }
 
-    console.log(etudiant)
 
     return (
         <div className='w-full flex items-center  min-h-screen'>

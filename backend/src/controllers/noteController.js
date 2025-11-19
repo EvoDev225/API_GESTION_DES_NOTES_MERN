@@ -55,7 +55,7 @@ const insererNote = async (req,res)=>{
                 return res.status(404).json({message:"Aucun étudiant ne correspond a ce matricule"})
             }
             const majNotes = await Note.findByIdAndUpdate(id, {matetud,francais,mathematique,anglais,svt,moyenneGenerale})
-            return res.status(200).json({message:"Les notes ont été modifié avec succès !",data:majNotes})
+            return res.status(200).json({Status:"Success",message:"Les notes ont été modifié avec succès !",data:majNotes})
         } catch (error) {
             return res.status(500).json({message:"Une erreur est survenue lors de la modification des notes !",error:error.message})
         }
@@ -71,5 +71,18 @@ const insererNote = async (req,res)=>{
             
         }
     }
+    const selection = async(req,res)=>{
+            const {matricule} = req.params
+    try {
+        // On vérifie si l'identifiant est correcte
+        const notes = await Note.find({matetud:matricule})
+        if(notes.length===0){
+            return res.status(404).json({message:"Aucune notes n'a été trouvé correspondant a ce matricule !"})
+        }
+        return res.status(200).json({Status:"Success",message:"Les notes  de l'étudiant  ont été récupéré !",data:notes})
+    } catch (error) {
+        return res.status(500).json({message:"Une erreur est survenue lors de l'obtention des notes !",error:error.message})
+    }
+    }
 
-    module.exports = {touteNote,etudiantNote,insererNote,majNote,suppNote}
+    module.exports = {touteNote,etudiantNote,insererNote,majNote,suppNote,selection}

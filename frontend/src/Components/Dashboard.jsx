@@ -5,6 +5,7 @@ import { FaUser } from "react-icons/fa";
 import { FaUsers } from "react-icons/fa";
 import { FaRegChartBar } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { Link } from "react-router";
 const Dashboard = () => {
     const [etudiant, setEtudiant] = useState([]);
     const [notes, setNotes] = useState([]);
@@ -164,7 +165,6 @@ const Dashboard = () => {
             toast.error(error.response)
         }
     }
-
     return (
         <div className="min-h-screen flex relative">
             <NavBar />
@@ -261,9 +261,11 @@ const Dashboard = () => {
                                             <td>{et.sexe}</td>
                                             <td>
                                                 <div className="flex items-center gap-4 justify-center">
+                                                <Link to={`/majEtudiant/${et.matricule}`}>
                                                     <button className="border-2 px-4 py-2 rounded-xl bg-green-600 border-green-400 cursor-pointer duration-200 transition-colors hover:bg-green-800 text-white">
                                                         Modifier
                                                     </button>
+                                                </Link>
                                                     <button onClick={() => supprimerEtudiant(et._id)} className="border-2 px-4 py-2 rounded-xl bg-red-600 border-red-400 cursor-pointer duration-200 transition-colors hover:bg-red-800 text-white">
                                                         Supprimer
                                                     </button>
@@ -346,9 +348,11 @@ const Dashboard = () => {
                                             </td>
                                             <td>
                                                 <div className="flex items-center gap-4 justify-center">
+                                                   <Link to={`/majNote/${n.matetud}`}>
                                                     <button className="border-2 px-4 py-2 rounded-xl bg-green-600 border-green-400 cursor-pointer duration-200 transition-colors hover:bg-green-800 text-white">
                                                         Modifier
                                                     </button>
+                                                   </Link>
                                                     <button className="border-2 px-4 py-2 rounded-xl bg-red-600 border-red-400 cursor-pointer duration-200 transition-colors hover:bg-red-800 text-white">
                                                         Supprimer
                                                     </button>
