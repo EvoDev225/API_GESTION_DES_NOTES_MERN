@@ -1,6 +1,13 @@
 import { FaPlusCircle } from "react-icons/fa";
 import { FaFileAlt } from "react-icons/fa";
+import { HiOutlineLogout } from "react-icons/hi";
+import { useNavigate } from "react-router";
+
 const NavBar = () => {
+  const navigate = useNavigate()
+  const Navigate = ()=>{
+          navigate("/")
+      }
   return (
     <div className=" flex flex-col py-20 px-5 min-h-screen fixed  w-[200px] shadow-xl ">
             <div className="text-3xl font-bold">
@@ -11,6 +18,8 @@ const NavBar = () => {
                 <div className="flex items-center gap-5 text-xl font-bold p-2 rounded-xl border-l-5 duration-200 transition-all hover:shadow-2xl cursor-pointer hover:-translate-y-2 border-green-500"><span><FaPlusCircle /></span>Etudiants</div>
                 <div className="flex items-center gap-5 text-xl font-bold p-2 rounded-xl border-l-5 duration-200 transition-all hover:shadow-2xl cursor-pointer hover:-translate-y-2 border-red-500"><span><FaFileAlt /></span>Etudiants</div>
             </div>
+              <span onClick={Navigate}  className="absolute bottom-50 left-15 text-3xl text-red-600 hover:scale-90 duration-200 transition-all cursor-pointer"><HiOutlineLogout /></span>
+            
     </div>
   )
 }

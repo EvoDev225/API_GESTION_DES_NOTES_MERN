@@ -16,13 +16,13 @@ const toutEtudiant = async (req, res) => {
 }
 // Sélection d'un étudiant par son identifiant
 const specifiqEtudiant = async (req, res) => {
-    const id = req.params.id
+    const matricule = req.params.matricule
     try {
-        const etudiant = await Etudiant.findById(id)
+        const etudiant = await Etudiant.findOne({matricule})
         if (!etudiant) {
             return res.status(400).json({ message: "Aucun étudiant n'a été trouvé !" })
         }
-        return res.status(200).json({ message: "Etudiant identifié !", data: etudiant })
+        return res.status(200).json({Status:"Success", message: "Etudiant identifié !", data:etudiant })
     } catch (error) {
         return res.status(400).json({ message: "Une erreur est survenue lors de l'obtention des informations de l'étudiant !", error: error.message })
     }
@@ -38,7 +38,7 @@ try {
     if(!etud){
         return res.status(404).json({message:"Le matricule est incorrecte"})
     }
-    return res.status(201).json({Status:"Success",message:"Etudiant connecté !"})
+    return res.status(201).json({Status:"Success",message:"Etudiant autorisé !",data:etud})
 } catch (error) {
     return res.status(500).json({message:"Une erreur est survenue lors de la connexion de l'étudiant !"})
 }

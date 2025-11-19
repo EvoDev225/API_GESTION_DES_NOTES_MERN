@@ -30,13 +30,14 @@ const Login = () => {
 
     if (etudiant.data.Status === "Success") {
       toast.success(etudiant.data.message);
+      navigate(`/resultat/${matricule}`)
+
       return; 
     }
   } catch (error) {
     toast.error(error.response?.data?.message || "Identifiants incorrects");
   }
 };
-    
   return (
     <section className='  min-h-screen '>
       <div className=" max-w-7xl flex items-center justify-center  mx-auto ">

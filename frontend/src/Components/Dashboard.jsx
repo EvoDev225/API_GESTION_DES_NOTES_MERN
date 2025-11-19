@@ -4,9 +4,7 @@ import axios from "axios";
 import { FaUser } from "react-icons/fa";
 import { FaUsers } from "react-icons/fa";
 import { FaRegChartBar } from "react-icons/fa";
-import { FaFilter } from "react-icons/fa6";
 import toast from "react-hot-toast";
-
 const Dashboard = () => {
     const [etudiant, setEtudiant] = useState([]);
     const [notes, setNotes] = useState([]);
@@ -15,7 +13,7 @@ const Dashboard = () => {
     const [selectedEtudiant, setSelectedEtudiant] = useState("");
     const [pourcentageReussite, setPourcentageReussite] = useState(0);
     const [selectedClasseId, setSelectedClasseId] = useState("");
-
+ 
     useEffect(() => {
         const fetchEtudiant = async () => {
             try {
@@ -228,7 +226,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Filtres */}
-                <div className="py-4 rounded-full shadow-2xl justify-around my-15 flex items-center max-w-7xl mx-auto">
+                <div className="py-4 rounded-full shadow-2xl justify-center gap-20 my-15 flex items-center max-w-7xl mx-auto">
                     <div className="px-5 py-2 flex items-center gap-3">
                         <p className="text-2xl font-bold">Classe:</p>
                         <select
@@ -260,17 +258,7 @@ const Dashboard = () => {
                         </select>
                     </div>
 
-                    <div className="flex items-center">
-                        <span className="text-2xl">
-                            <FaFilter />
-                        </span>
-                        <div className="px-5 py-2 flex items-center gap-3">
-                            <p className="text-2xl font-bold">A-Z</p>
-                        </div>
-                        <div className="px-5 py-2 flex items-center gap-3">
-                            <p className="text-2xl font-bold">Z-A</p>
-                        </div>
-                    </div>
+                   
                 </div>
 
                 {/* Tableau des étudiants */}
@@ -397,7 +385,7 @@ const Dashboard = () => {
                                     <tr>
                                         <td colSpan="9" className="text-center py-8 text-gray-500">
                                             Sélectionnez un étudiant pour afficher ses notes
-                                            jfjfjfjfjfjfjfjffjjfjfjfjf
+                                        
                                         </td>
                                     </tr>
                                 )}
