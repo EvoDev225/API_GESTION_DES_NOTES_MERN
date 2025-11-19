@@ -144,30 +144,7 @@ const Dashboard = () => {
         fetchNotes(matricule);
     };
 
-    // Fonction pour calculer la moyenne d'une matière
-    const calculerMoyenneMatiere = (notesMatiere) => {
-        if (!notesMatiere || notesMatiere.length === 0) return 0;
-        const somme = notesMatiere.reduce((acc, note) => acc + note, 0);
-        return (somme / notesMatiere.length).toFixed(2);
-    };
-
-    // Fonction pour calculer la moyenne générale
-    const calculerMoyenneGenerale = (allNotes) => {
-        if (!allNotes || Object.keys(allNotes).length === 0) return 0;
-
-        let totalNotes = 0;
-        let totalMatieres = 0;
-
-        Object.values(allNotes).forEach((notesMatiere) => {
-            if (notesMatiere && notesMatiere.length > 0) {
-                const moyenneMatiere = calculerMoyenneMatiere(notesMatiere);
-                totalNotes += parseFloat(moyenneMatiere);
-                totalMatieres++;
-            }
-        });
-
-        return totalMatieres > 0 ? (totalNotes / totalMatieres).toFixed(2) : 0;
-    };
+   
 
     const supprimerEtudiant = async (id) => {
         try {
@@ -214,13 +191,13 @@ const Dashboard = () => {
                         <div className="stat">
                             <div className="stat-figure text-secondary">
                                 <div className="">
-                                    <div className="w-16 text-5xl">
+                                    <div className="w-16 text-5xl text-orange-400">
                                         <FaRegChartBar />
                                     </div>
                                 </div>
                             </div>
                             <div className="stat-title text-3xl">Pourcentage de réussite</div>
-                            <div className="stat-value">{pourcentageReussite}%</div>
+                            <div className="stat-value ">{pourcentageReussite}%</div>
                         </div>
                     </div>
                 </div>
@@ -257,8 +234,6 @@ const Dashboard = () => {
                             ))}
                         </select>
                     </div>
-
-                   
                 </div>
 
                 {/* Tableau des étudiants */}

@@ -4,6 +4,7 @@ import {Toaster} from "react-hot-toast"
 import Dashboard from "./Components/Dashboard"
 import Etudiant from "./Components/Etudiant"
 import Insertion from "./Components/Insertion"
+import Notes from "./Components/Notes"
 function App() {
   return (
     <>
@@ -14,6 +15,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard/>} ></Route>
           <Route path="/resultat/:matricule" element={<Etudiant/>} ></Route>
           <Route path="/insertion" element={<Insertion/>} ></Route>
+          <Route path="/notes" element={<Notes/>} ></Route>
       </Routes>
     </BrowserRouter>
 

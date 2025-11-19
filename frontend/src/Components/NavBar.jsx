@@ -14,7 +14,7 @@ const NavBar = () => {
                 DashBoard
             </div>
             <div className="mt-20 flex flex-col gap-20">
-              <Link>
+              <Link to="/notes">
               <div className="flex items-center gap-5 text-xl font-bold p-2 rounded-xl border-l-5 duration-200 transition-all hover:shadow-2xl cursor-pointer hover:-translate-y-2 border-blue-500"><span> <FaPlusCircle /></span>Notes</div>
               </Link>
               <Link to='/insertion'>

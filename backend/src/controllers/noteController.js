@@ -40,7 +40,7 @@ const insererNote = async (req,res)=>{
         }
         const nouveau = new Note( {matetud,francais,mathematique,anglais,svt,moyenneGenerale,Status})
         const ajouterNote = await nouveau.save()
-        return res.status(201).json({message:"Les notes ont bien été enregistrées",data:ajouterNote})
+        return res.status(201).json({Status:"Success",message:"Les notes ont bien été enregistrées",data:ajouterNote})
     } catch (error) {
         return res.status(500).json({message:"Une erreur est survenue lors de l'insertion des notes !",error:error.message})
 }
