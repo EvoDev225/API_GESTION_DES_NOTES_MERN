@@ -86,3 +86,7 @@ const insererNote = async (req,res)=>{
     }
 
     module.exports = {touteNote,etudiantNote,insererNote,majNote,suppNote,selection}
+
+
+
+    // .exe

@@ -62,7 +62,7 @@ const MajNote = () => {
         // Fonction pour calculer la moyenne générale
         const calculerMoyenneGenerale = (notesData) => {
             const totalCoef = coefficients.francais + coefficients.mathematique + 
-                             coefficients.anglais + coefficients.svt;
+                            coefficients.anglais + coefficients.svt;
             
             const sommeNotes = (notesData.francais[2] * coefficients.francais) +
                               (notesData.mathematique[2] * coefficients.mathematique) +
