@@ -104,7 +104,7 @@ const MajNote = () => {
             <NavBar />
             <div className="pl-[200px] mt-20 w-7xl mx-auto p-10 shadow-2xl rounded-2xl">
                 <div>
-                    <h1 className="text-5xl uppercase font-bold">Insérer des notes</h1>
+                    <h1 className="text-5xl uppercase font-bold">Modification des notes</h1>
                 </div>
                 <div className="w-full flex flex-col gap-8 my-15">
                     <div className="flex">

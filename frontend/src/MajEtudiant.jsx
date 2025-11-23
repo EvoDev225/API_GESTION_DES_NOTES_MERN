@@ -3,10 +3,10 @@ import axios from "axios"
 import toast from "react-hot-toast"
 import NavBar from "./Components/NavBar"
 import { useParams } from "react-router"
-
+import { useNavigate } from "react-router"
 const MajEtudiant = () => {
     const { matricule } = useParams()
-
+    const navigate = useNavigate()
     const [etudiant, setEtudiant] = useState({
         matricule: "",
         nom: "",
@@ -39,7 +39,8 @@ const MajEtudiant = () => {
             const maj = await axios.put(`http://localhost:3000/etudiant/${etudiant._id}`, etudiant)
 
             if (maj.data.Status === "Success") {
-                toast.success("Étudiant mis à jour avec succès")
+                toast.success("Les données de l'étudiant ont été mise à jour !")
+                navigate("/dashboard")
             }
         } catch (error) {
             console.log(error)

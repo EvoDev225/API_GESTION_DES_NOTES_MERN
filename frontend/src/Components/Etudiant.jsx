@@ -29,7 +29,6 @@ const Etudiant = () => {
                 const notes = await axios.post(`http://localhost:3000/note/etudiant`, { matricule: matricule.matricule })
                 if (notes.data.Status === "Success") {
                     setNote(notes.data.data)
-                    toast.success(notes.data.message)
                 }
             } catch (error) {
                 toast.error(error.response?.data?.error)
